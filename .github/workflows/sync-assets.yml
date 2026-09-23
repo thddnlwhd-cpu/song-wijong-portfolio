@@ -1,0 +1,49 @@
+name: Sync portfolio assets
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download portfolio media
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://song-wijong-portfolio.swj1996.chatgpt.site"
+          files=(
+            commerce/01.jpg commerce/01.mp4 commerce/02.jpg commerce/02.mp4
+            commerce/03.jpg commerce/03.mp4 commerce/04.jpg commerce/04.mp4
+            commerce/05.jpg commerce/05.mp4 commerce/06.jpg commerce/06.mp4
+            commerce/07.jpg commerce/07.mp4 commerce/08.jpg commerce/08.mp4
+            commerce/09.jpg commerce/09.mp4 commerce/10.jpg commerce/10.mp4
+            commerce/11.jpg commerce/11.mp4 commerce/12.jpg commerce/12.mp4
+            commerce/13.jpg commerce/13.mp4 commerce/14.jpg commerce/14.mp4
+            videos/awards-bg.mp4 videos/bbusulang.mp4 videos/culture.mp4
+            videos/hana.mp4 videos/iherb.mp4 videos/mediheal.mp4
+            videos/poster.jpg videos/seveneleven-bibimbap.mp4
+          )
+          mkdir -p commerce videos
+          for file in "${files[@]}"; do
+            curl --fail --location --retry 3 --retry-delay 2               --output "$file" "$base/$file"
+          done
+
+      - name: Commit media files
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add commerce videos
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Add portfolio media assets"
+          git push
