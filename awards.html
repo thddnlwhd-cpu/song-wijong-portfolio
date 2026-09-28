@@ -7,6 +7,29 @@
   <title>AWARDS — SONG WIJONG</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="awards.css">
+  <style>
+    .film-open{position:relative;display:block;width:100%;padding:0;border:0;background:none;color:inherit;cursor:pointer;text-align:inherit}
+    .film-open video{display:block;width:100%;pointer-events:none}
+    .film-open-hint{position:absolute;right:12px;bottom:12px;padding:7px 10px;border:1px solid rgba(255,255,255,.45);border-radius:999px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;letter-spacing:.12em;backdrop-filter:blur(8px)}
+    .project-modal[hidden]{display:none}
+    .project-modal{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:24px}
+    .project-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(10px)}
+    .project-dialog{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);width:min(1120px,94vw);max-height:90vh;overflow:auto;border:1px solid rgba(255,255,255,.16);background:#0b0b0b;color:#f7f7f7;box-shadow:0 30px 100px rgba(0,0,0,.55)}
+    .project-media{display:flex;align-items:center;justify-content:center;min-height:420px;background:#000}
+    .project-media video{display:block;width:100%;max-height:82vh;object-fit:contain;background:#000}
+    .project-info{display:flex;flex-direction:column;justify-content:center;padding:clamp(28px,4vw,58px)}
+    .project-kicker{margin:0 0 16px;color:#aaa;font-size:10px;letter-spacing:.2em}
+    .project-info h2{margin:0 0 12px;font-size:clamp(24px,3vw,42px);line-height:1.12}
+    .project-award{margin:0 0 34px;color:#ddd;font-size:15px}
+    .project-meta{margin:0}
+    .project-meta>div{display:grid;grid-template-columns:105px 1fr;gap:14px;padding:15px 0;border-top:1px solid rgba(255,255,255,.13)}
+    .project-meta>div:last-child{border-bottom:1px solid rgba(255,255,255,.13)}
+    .project-meta dt{font-size:12px;font-weight:700;white-space:nowrap}
+    .project-meta dd{margin:0;color:#ccc;font-size:13px;line-height:1.7}
+    .project-close{position:absolute;top:14px;right:14px;z-index:2;width:40px;height:40px;border:1px solid rgba(255,255,255,.3);border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:23px;line-height:1;cursor:pointer}
+    body.modal-open{overflow:hidden}
+    @media(max-width:760px){.project-modal{padding:12px}.project-dialog{grid-template-columns:1fr;width:min(96vw,560px);max-height:92vh}.project-media{min-height:auto}.project-media video{max-height:55vh}.project-info{padding:26px 22px 32px}.project-meta>div{grid-template-columns:1fr;gap:7px}.film-open-hint{font-size:9px}}
+  </style>
 </head>
 <body>
   <header class="top solid">
@@ -28,7 +51,10 @@
     </section>
     <div class="award-films">
       <article class="award-film">
-        <video controls playsinline preload="metadata" aria-label="2026 메디힐 AI 공모전 영상"><source src="videos/mediheal.mp4#t=0.1" type="video/mp4">이 브라우저에서는 영상을 재생할 수 없습니다. <a href="videos/mediheal.mp4">영상 열기</a></video>
+        <button class="film-open" type="button" data-open-project="mediheal-detail" aria-haspopup="dialog" aria-controls="mediheal-detail" aria-label="2026 메디힐 AI 공모전 상세 보기">
+          <video muted playsinline preload="metadata" aria-hidden="true"><source src="videos/mediheal.mp4#t=0.1" type="video/mp4"></video>
+          <span class="film-open-hint">VIEW DETAILS</span>
+        </button>
         <div class="film-caption"><h2>2026 메디힐 AI 공모전</h2><span class="film-award">금상</span></div>
       </article>
       <article class="award-film">
@@ -53,7 +79,52 @@
       </article>
     </div>
   </main>
+
+  <div class="project-modal" id="mediheal-detail" hidden>
+    <div class="project-modal-backdrop" data-close-project></div>
+    <section class="project-dialog" role="dialog" aria-modal="true" aria-labelledby="mediheal-modal-title">
+      <button class="project-close" type="button" data-close-project aria-label="상세 창 닫기">×</button>
+      <div class="project-media">
+        <video controls playsinline preload="metadata" aria-label="2026 메디힐 AI 공모전 영상"><source src="videos/mediheal.mp4#t=0.1" type="video/mp4">이 브라우저에서는 영상을 재생할 수 없습니다.</video>
+      </div>
+      <div class="project-info">
+        <p class="project-kicker">AWARD FILM</p>
+        <h2 id="mediheal-modal-title">2026 메디힐 AI 공모전</h2>
+        <p class="project-award">부문2 종합 금상</p>
+        <dl class="project-meta">
+          <div><dt>사용 AI 툴 │</dt><dd class="tool-list">Kling, Hailuo, NanoBanana</dd></div>
+          <div><dt>담당 │</dt><dd>기획, 이미지 생성, 영상 제작, 편집, 녹음</dd></div>
+        </dl>
+      </div>
+    </section>
+  </div>
+
   <div class="notice" role="status">SNS 주소를 연결할 예정입니다.</div>
   <script src="app.js"></script>
+  <script>
+    (() => {
+      const openButton = document.querySelector('[data-open-project="mediheal-detail"]');
+      const modal = document.getElementById('mediheal-detail');
+      if (!openButton || !modal) return;
+      const modalVideo = modal.querySelector('video');
+      const closeButton = modal.querySelector('.project-close');
+      const openModal = () => {
+        modal.hidden = false;
+        document.body.classList.add('modal-open');
+        closeButton.focus();
+      };
+      const closeModal = () => {
+        if (modalVideo) modalVideo.pause();
+        modal.hidden = true;
+        document.body.classList.remove('modal-open');
+        openButton.focus();
+      };
+      openButton.addEventListener('click', openModal);
+      modal.querySelectorAll('[data-close-project]').forEach((button) => button.addEventListener('click', closeModal));
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modal.hidden) closeModal();
+      });
+    })();
+  </script>
 </body>
 </html>
