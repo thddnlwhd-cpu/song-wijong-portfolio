@@ -7,3 +7,4 @@
 .commerce .commerce-grid{margin-top:32px;padding-inline:24px}
 @media(max-width:850px){.archive.commerce{padding-top:70px}.commerce .archive-head{min-height:250px}}
 @media(max-width:540px){.commerce .archive-head{padding:40px 20px}.commerce .archive-head p{font-size:.875rem}.commerce .commerce-grid{padding-inline:20px}}
+.commerce-date{margin:10px 0 0;color:var(--white);font-size:.875rem;letter-spacing:.04em;text-align:center}
