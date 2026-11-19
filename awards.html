@@ -17,6 +17,9 @@
     .project-dialog{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);width:min(1160px,94vw);max-height:90vh;overflow:auto;border:1px solid rgba(255,255,255,.16);background:#0b0b0b;color:#f7f7f7;box-shadow:0 30px 100px rgba(0,0,0,.55)}
     .project-media{display:flex;align-items:center;justify-content:center;min-height:420px;background:#000}
     .project-media video{display:block;width:100%;max-height:82vh;object-fit:contain;background:#000}
+    .project-media iframe{width:100%;aspect-ratio:16/9;border:0}
+    .project-description{color:#ccc;font-size:16px;line-height:1.7;white-space:pre-line}
+    .project-media [hidden],.project-info [hidden]{display:none}
     .project-info{display:flex;flex-direction:column;justify-content:center;padding:clamp(28px,4vw,58px)}
     .project-kicker{margin:0 0 16px;color:#aaa;font-size:10px;letter-spacing:.2em}
     .project-year{align-self:flex-start;margin:0 0 18px;padding:7px 15px;border:1px solid rgba(255,255,255,.42);border-radius:999px;color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em}
@@ -55,7 +58,7 @@
     </section>
     <div class="award-films">
       <article class="award-film">
-        <iframe src="https://www.youtube-nocookie.com/embed/ixm38GknoVs" title="자원봉사 × AI 영상 공모전 — 최우수상" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        <button class="film-open" type="button" data-youtube="ixm38GknoVs" data-title="자원봉사 × AI 영상 공모전" data-award="최우수상" aria-label="자원봉사 × AI 영상 공모전 — 최우수상 상세 보기"><img src="https://i.ytimg.com/vi/ixm38GknoVs/hqdefault.jpg" alt="" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover"><span class="film-open-hint">VIEW DETAILS</span></button>
         <div class="film-caption"><h2>자원봉사 × AI 영상 공모전</h2><span class="film-award">최우수상</span></div>
       </article>
       <article class="award-film">
@@ -95,7 +98,7 @@
         <div class="film-caption"><h2>세븐일레븐 K-비빔밥 AI 광고제</h2></div>
       </article>
       <article class="award-film">
-        <iframe src="https://www.youtube-nocookie.com/embed/-9k5VGHhwqo" title="2026 화성특례시 AI CF 공모 [별별화성]" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        <button class="film-open" type="button" data-youtube="-9k5VGHhwqo" data-title="2026 화성특례시 AI CF 공모 [별별화성]" data-award="" aria-label="2026 화성특례시 AI CF 공모 [별별화성] 상세 보기"><img src="https://i.ytimg.com/vi/-9k5VGHhwqo/hqdefault.jpg" alt="" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover"><span class="film-open-hint">VIEW DETAILS</span></button>
         <div class="film-caption"><h2>2026 화성특례시 AI CF 공모 [별별화성]</h2></div>
       </article>
     </div>
@@ -111,6 +114,7 @@
         <p class="project-year"></p>
         <h2 id="project-modal-title"></h2>
         <p class="project-award"></p>
+        <p class="project-description" hidden></p>
         <dl class="project-meta">
           <div><dt>사용 AI 툴 │</dt><dd class="project-tools"></dd></div>
           <div><dt>담당 │</dt><dd class="project-role"></dd></div>
@@ -126,6 +130,13 @@
       const modal = document.getElementById('award-detail');
       if (!modal) return;
       const modalVideo = modal.querySelector('video');
+      const youtube = document.createElement('iframe');
+      youtube.title = '공모전 유튜브 영상';
+      youtube.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      youtube.referrerPolicy = 'strict-origin-when-cross-origin';
+      youtube.allowFullscreen = true;
+      youtube.hidden = true;
+      modal.querySelector('.project-media').append(youtube);
       const modalSource = modalVideo.querySelector('source');
       const title = modal.querySelector('#project-modal-title');
       const year = modal.querySelector('.project-year');
@@ -136,6 +147,7 @@
       let lastButton = null;
       const closeModal = () => {
         modalVideo.pause();
+        youtube.removeAttribute("src");
         modal.hidden = true;
         document.body.classList.remove('modal-open');
         if (lastButton) lastButton.focus();
@@ -144,12 +156,24 @@
         button.addEventListener('click', () => {
           lastButton = button;
           title.textContent = button.dataset.title;
-          year.textContent = button.dataset.year;
+          year.textContent = button.dataset.year || "";
+          year.hidden = !button.dataset.year;
           award.textContent = button.dataset.award;
-          tools.textContent = button.dataset.tools;
-          role.textContent = button.dataset.role;
-          modalSource.src = button.dataset.video;
-          modalVideo.load();
+          tools.textContent = button.dataset.tools || "";
+          tools.parentElement.hidden = !button.dataset.tools;
+          role.textContent = button.dataset.role || "";
+          role.parentElement.hidden = !button.dataset.role;
+          const description = modal.querySelector(".project-description");
+          description.textContent = button.dataset.description || "";
+          description.hidden = !button.dataset.description;
+          modalVideo.hidden = Boolean(button.dataset.youtube);
+          youtube.hidden = !button.dataset.youtube;
+          if (button.dataset.youtube) {
+            youtube.src = 'https://www.youtube-nocookie.com/embed/' + button.dataset.youtube + '?autoplay=1&playsinline=1';
+          } else {
+            modalSource.src = button.dataset.video;
+            modalVideo.load();
+          }
           modal.hidden = false;
           document.body.classList.add('modal-open');
           closeButton.focus();
